@@ -30,7 +30,7 @@ public:
 	IN_ADDR Get_DefaultMyIP();
 
 	// 소켓 셋팅
-	SOCKET Set_TCPServer(short _portNum, int _backLog);
+	void Set_TCPSocket(short _portNum, int _backLog);
 
 	// 네트워크 이벤트
 	HANDLE Add_NetworkEvent(SOCKET _sock, long _netEvent);

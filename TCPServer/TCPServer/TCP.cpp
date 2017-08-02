@@ -16,7 +16,7 @@ TCP::~TCP()
 void TCP::Init()
 {
 	WSAStartup(MAKEWORD(2, 2), &m_WsaData);
-	m_ServerSocket = Set_TCPServer(PORT_NUM, BLOG_SIZE);
+	Set_TCPSocket(PORT_NUM, BLOG_SIZE);
 }
 
 void TCP::Update()
@@ -145,14 +145,12 @@ IN_ADDR TCP::Get_DefaultMyIP()
 	return addr;
 }
 
-SOCKET TCP::Set_TCPServer(short _portNum, int _backLog)
+void TCP::Set_TCPSocket(short _portNum, int _backLog)
 {
-	SOCKET tempSock;
+	m_ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	tempSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if (tempSock == INVALID_SOCKET)
-		return -1;
+	if (m_ServerSocket == INVALID_SOCKET)
+		perror("socket() error");
 
 	SOCKADDR_IN servAddr = { 0 };
 
@@ -160,13 +158,11 @@ SOCKET TCP::Set_TCPServer(short _portNum, int _backLog)
 	servAddr.sin_addr = Get_DefaultMyIP();
 	servAddr.sin_port = htons(_portNum);
 
-	if (bind(tempSock, (SOCKADDR*)&servAddr, sizeof(servAddr) == SOCKET_ERROR))
-		return -1;
+	if (bind(m_ServerSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
+		perror("bind() error");
 
-	if (listen(tempSock, _backLog) == SOCKET_ERROR)
-		return -1;
-
-	return tempSock;
+	if (listen(m_ServerSocket, _backLog) == SOCKET_ERROR)
+		perror("listen() error");
 }
 
 HANDLE TCP::Add_NetworkEvent(SOCKET _sock, long _netEvent)

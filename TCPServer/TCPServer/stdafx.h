@@ -9,11 +9,3 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-void ErrorHandling(char* message);
-
-void ErrorHandling(char* message)
-{
-	fputs(message, stderr);
-	fputc('\n', stderr);
-	exit(1);
-}

@@ -15,12 +15,16 @@ TCP::~TCP()
 
 void TCP::Init()
 {
+	cout << "init" << endl;
+
 	WSAStartup(MAKEWORD(2, 2), &m_WsaData);
 	Set_TCPSocket(PORT_NUM, BLOG_SIZE);
 }
 
 void TCP::Update()
 {
+	cout << "update" << endl;
+
 	if (m_ServerSocket == SOCKET_ERROR)
 		perror("대기 소켓 오류");
 	else
@@ -29,11 +33,15 @@ void TCP::Update()
 
 void TCP::Clean()
 {
+	cout << "clean" << endl;
+
 	WSACleanup(); // 윈속 해제
 }
 
 void TCP::EventLoop(SOCKET _sock)
 {
+	cout << "event loop(server)" << endl;
+
 	Add_NetworkEvent(_sock, FD_ACCEPT);
 
 	while (true) // 이벤트 루프
@@ -64,6 +72,8 @@ void TCP::EventLoop(SOCKET _sock)
 
 void TCP::AcceptProc(int _index)
 {
+	cout << "accept proc" << endl;
+
 	SOCKADDR_IN clientAddr = { 0 };
 
 	int len = sizeof(clientAddr);
@@ -83,13 +93,15 @@ void TCP::AcceptProc(int _index)
 
 void TCP::ReadProc(int _index)
 {
+	cout << "read proc" << endl;
+
 	char msg[MAX_MSG_LEN];
 	recv(m_SocketBase[_index], msg, MAX_MSG_LEN, 0);
 
 	SOCKADDR_IN clientAddr = { 0 };
 	int len = sizeof(clientAddr);
 	getpeername(m_SocketBase[_index], (SOCKADDR *)&clientAddr, &len);
-
+	
 	char smsg[MAX_MSG_LEN];
 	sprintf(smsg, "[%s:%d]:%s", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), msg);
 
@@ -101,6 +113,8 @@ void TCP::ReadProc(int _index)
 
 void TCP::CloseProc(int _index)
 {
+	cout << "close proc" << endl;
+
 	SOCKADDR_IN clientAddr = { 0 };
 	int len = sizeof(clientAddr);
 	getpeername(m_SocketBase[_index], (SOCKADDR *)&clientAddr, &len);
@@ -147,6 +161,8 @@ IN_ADDR TCP::Get_DefaultMyIP()
 
 void TCP::Set_TCPSocket(short _portNum, int _backLog)
 {
+	cout << "set socket()" << endl;
+
 	m_ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if (m_ServerSocket == INVALID_SOCKET)
@@ -155,7 +171,8 @@ void TCP::Set_TCPSocket(short _portNum, int _backLog)
 	SOCKADDR_IN servAddr = { 0 };
 
 	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr = Get_DefaultMyIP();
+	servAddr.sin_addr.s_addr = inet_addr(IP);
+	//servAddr.sin_addr = Get_DefaultMyIP();
 	servAddr.sin_port = htons(_portNum);
 
 	if (bind(m_ServerSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)

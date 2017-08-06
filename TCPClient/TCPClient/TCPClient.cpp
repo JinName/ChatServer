@@ -2,18 +2,36 @@
 
 void TCPClient::Init()
 {
+	WSAStartup(MAKEWORD(2, 2), &m_WsaData);//윈속 초기화
+	Set_TCPSocket();
+	Connect(PORT_NUM);
 }
 
 void TCPClient::Update()
 {
+	char msg[MAX_MSG_LEN] = "";
+	while (true)
+	{
+		gets_s(msg, MAX_MSG_LEN);
+		send(m_ClientSocket, msg, sizeof(msg), 0);//송신
+		if (strcmp(msg, "exit") == 0)
+		{
+			break;
+		}
+	}
 }
 
 void TCPClient::Clean()
 {
+	closesocket(m_ClientSocket);//소켓 닫기    
+
+	WSACleanup();//윈속 해제화
 }
 
 void TCPClient::Set_TCPSocket()
 {
+	cout << "set socket()" << endl;
+
 	m_ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if (m_ClientSocket == INVALID_SOCKET)
@@ -22,6 +40,8 @@ void TCPClient::Set_TCPSocket()
 
 void TCPClient::Connect(short _portNum)
 {
+	cout << "connect()" << endl;
+
 	SOCKADDR_IN servAddr = { 0 };
 
 	servAddr.sin_family = AF_INET;
@@ -30,15 +50,21 @@ void TCPClient::Connect(short _portNum)
 
 	if (connect(m_ClientSocket, (struct sockaddr*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
 		perror("connect() error");
+	
+	Threading();
 }
 
 void TCPClient::Threading()
 {
+	cout << "begin thread()" << endl;
+
 	_beginthread(RecvThreadPoint, 0, (void*)m_ClientSocket);
 }
 
-void TCPClient::RecvThreadPoint(void* param)
+void RecvThreadPoint(void* param)
 {
+	cout << "thread function()" << endl;
+
 	SOCKET sock = (SOCKET)param;
 	char msg[MAX_MSG_LEN];
 
@@ -50,8 +76,6 @@ void TCPClient::RecvThreadPoint(void* param)
 		printf("%s\n", msg);
 	}
 	closesocket(sock);
-
-	return;
 }
 
 // TCPClient.cpp

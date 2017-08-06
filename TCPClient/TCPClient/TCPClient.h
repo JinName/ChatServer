@@ -2,13 +2,14 @@
 #include "stdafx.h"
 #include <process.h>
 
+
+void RecvThreadPoint(void* param);
+
 class TCPClient
 {
 private:
 	WSADATA m_WsaData;
-	SOCKET m_ClientSocket;
-
-	char msg[MAX_MSG_LEN];
+	SOCKET m_ClientSocket;	
 
 public:
 	TCPClient() {}
@@ -24,7 +25,5 @@ public:
 	// 연결 시도
 	void Connect(short _portNum);
 
-	void Threading();
-
-	void RecvThreadPoint(void* param)
+	void Threading();	
 };
